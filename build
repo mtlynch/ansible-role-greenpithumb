@@ -3,9 +3,19 @@
 # Exit immediately on error
 set -e
 
+<<<<<<< HEAD
 cd tests/
 
 cp "Dockerfile-${distro}" Dockerfile
+=======
+pushd tests/
+
+#echo "FROM debian:8" > Dockerfile
+#echo "ENV TERM=xterm" >> Dockerfile
+
+container_name="docker-target"
+printf "${container_name} ansible_connection=docker\n" > hosts
+>>>>>>> Temp commit, docker working
 
 # Build container
 container_tag=${distro}
@@ -14,14 +24,12 @@ sudo docker build \
   --tag=${container_tag} .
 
 # Run container in detached state
-id_file=$(mktemp)
 sudo docker run \
+  --name "${container_name}" \
   --detach \
   --volume="${PWD}":/etc/ansible/roles/role_under_test:ro \
   ${run_opts} \
-  ${container_tag} ${init} > "${id_file}"
-container_id="$(cat $id_file)"
-echo "Container ID:" "${container_id}"
+  ${container_tag} ${init}
 
 printf "${container_id} ansible_connection=docker\n" > hosts
 
@@ -52,7 +60,7 @@ grep -q "changed=0.*failed=0" "${idempotence_file}" && \
 # Get container's IP address.
 print_ip_python=$(echo "import sys, json;
 print json.load(sys.stdin)[0]['NetworkSettings']['IPAddress']")
-container_ip=$(sudo docker inspect "${container_id}" | \
+container_ip=$(sudo docker inspect "${container_name}" | \
     python -c "${print_ip_python}")
 echo "Container IP Address:" "${container_ip}"
 
