@@ -3,19 +3,9 @@
 # Exit immediately on error
 set -e
 
-<<<<<<< HEAD
 cd tests/
 
 cp "Dockerfile-${distro}" Dockerfile
-=======
-pushd tests/
-
-#echo "FROM debian:8" > Dockerfile
-#echo "ENV TERM=xterm" >> Dockerfile
-
-container_name="docker-target"
-printf "${container_name} ansible_connection=docker\n" > hosts
->>>>>>> Temp commit, docker working
 
 # Build container
 container_tag=${distro}
@@ -71,9 +61,23 @@ curl -s "http://${container_ip}/" \
   (echo "Landing page test: fail" && exit 1)
 
 # Make sure application files are accessible
-curl -s "http://${container_ip}/app/app.js" -o /dev/null && \
-  (echo "Application file test: pass") || \
-  (echo "Application file test: fail" && exit 1)
+response_code=$( \
+  curl -s -o /dev/null -w "%{http_code}" \
+  "http://${container_ip}/app.js")
+if [ "${response_code}" -eq 200 ]; then
+  echo "Application file test: pass"
+else
+  echo "Application file test: fail" && exit 1
+fi
+
+response_code=$( \
+  curl -s -o /dev/null -w "%{http_code}" \
+  "http://${container_ip}/bower_components/bootstrap/dist/css/bootstrap.min.css")
+if [ "${response_code}" -eq 200 ]; then
+  echo "Vendor file test: pass"
+else
+  echo "Vendor file test: fail" && exit 1
+fi
 
 # Make sure vendor files are accessible
 curl -s "http://${container_ip}/vendor/bootstrap/bootstrap.min.css" \
