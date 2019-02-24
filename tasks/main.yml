@@ -51,19 +51,20 @@
 - name: install Adafruit node.js package
   apt:
     name: node
-    state: installed
+    state: present
   when: is_pi
 
 - name: install necessary packages
   apt:
-    name: "{{ item }}"
-    state: installed
-  with_items:
-    - build-essential
-    - git
-    - python-dev
-    - python-openssl
-    - python-pip
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      - build-essential
+      - git
+      - python-dev
+      - python-openssl
+      - python-pip
 
 - name: configure Raspberry Pi camera
   include: "camera.yml"

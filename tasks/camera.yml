@@ -2,7 +2,7 @@
 - name: install picamera package
   apt:
     name: python-picamera
-    state: installed
+    state: present
 
 # TODO(mtlynch): Should reboot after this.
 - name: enable Raspberry Pi camera support
